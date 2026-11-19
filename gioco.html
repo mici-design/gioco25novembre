@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Campanelli d'allarme</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
+:root {
+    --bg: #171320;
+    --panel: #282033;
+    --pink: #e8a1b3;
+    --red: #b94c70;
+    --white: #fff4f5;
+    --muted: #c5b5c6;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+}
+
+#app {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+    radial-gradient(circle at 10% 20%, #75425b55, transparent 35%),
+    radial-gradient(circle at 90% 80%, #533c7555, transparent 35%),
+    var(--bg);
+}
+
+/* PARTICELLE */
+
+.particle {
+    position: fixed;
+    color: #e8a1b355;
+    pointer-events: none;
+    animation: rise linear infinite;
+    z-index: 0;
+}
+
+@keyframes rise {
+    from {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    20% { opacity: 1; }
+
+    to {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* SCHERMATE */
+
+.screen {
+    display: none;
+    min-height: 100vh;
+    padding: 35px 20px;
+    position: relative;
+    z-index: 2;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.screen.active {
+    display: flex;
+    animation: enter .7s ease;
+}
+
+@keyframes enter {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* TIPOGRAFIA */
+
+h1, h2 {
+    font-family: 'Playfair Display', serif;
+}
+
+h1 {
+    font-size: clamp(38px, 7vw, 75px);
+    line-height: 1.1;
+    max-width: 850px;
+    margin: 20px auto;
+}
+
+h2 {
+    font-size: clamp(28px, 5vw, 43px);
+    margin-bottom: 20px;
+}
+
+p {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 17px;
+    max-width: 650px;
+    margin: 12px auto;
+}
+
+/* PERSONAGGIO */
+
+.character {
+    width: 155px;
+    height: 175px;
+    position: relative;
+    margin: 20px auto;
+    animation: float 4s ease-in-out infinite;
+}
+
+.face {
+    width: 115px;
+    height: 130px;
+    background: #eab59f;
+    border-radius: 48% 48% 45% 45%;
+    position: absolute;
+    left: 20px;
+    top: 15px;
+    z-index: 2;
+}
+
+.hair {
+    width: 130px;
+    height: 145px;
+    background: #392638;
+    border-radius: 50% 50% 35% 35%;
+    position: absolute;
+    left: 12px;
+    top: 5px;
+    z-index: 1;
+}
+
+.eyes {
+    position: absolute;
+    top: 58px;
+    left: 38px;
+    display: flex;
+    gap: 34px;
+    z-index: 3;
+}
+
+.eyes span {
+    background: #35232b;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.mouth {
+    position: absolute;
+    top: 88px;
+    left: 55px;
+    width: 25px;
+    height: 12px;
+    border-bottom: 2px solid #914e5b;
+    border-radius: 50%;
+    z-index: 3;
+}
+
+.neck {
+    position: absolute;
+    width: 35px;
+    height: 40px;
+    background: #eab59f;
+    left: 60px;
+    top: 130px;
+    z-index: 1;
+}
+
+.dress {
+    position: absolute;
+    top: 150px;
+    left: 15px;
+    width: 125px;
+    height: 85px;
+    background: #a44f70;
+    border-radius: 40px 40px 10px 10px;
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* PULSANTI */
+
+.btn {
+    border: none;
+    border-radius: 40px;
+    padding: 17px 32px;
+    margin: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    transition: .3s;
+}
+
+.primary {
+    background: linear-gradient(120deg, #d77896, #a64a73);
+    color: white;
+    box-shadow: 0 8px 30px #c35d8055;
+}
+
+.btn:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 10px 35px #e88da055;
+}
+
+.secondary {
+    background: #ffffff12;
+    border: 1px solid #ffffff44;
+    color: white;
+}
+
+/* CONTENITORE GIOCO */
+
+.game-card {
+    width: min(700px, 95%);
+    background: linear-gradient(145deg,#30263c,#211b2b);
+    border: 1px solid #ffffff18;
+    border-radius: 25px;
+    padding: 35px;
+    box-shadow: 0 20px 70px #00000055;
+}
+
+.badge {
+    display: inline-block;
+    background: #b94c7033;
+    color: #f2a8bd;
+    padding: 8px 16px;
+    border-radius: 30px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.question {
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    line-height: 1.5;
+    margin: 20px 0;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 25px;
+}
+
+.answer {
+    text-align: left;
+    background: #ffffff0d;
+    border: 1px solid #ffffff22;
+    color: white;
+    border-radius: 15px;
+    padding: 18px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1.5;
+    transition: .3s;
+}
+
+.answer:hover {
+    background: #b94c7033;
+    border-color: var(--pink);
+    transform: translateX(5px);
+}
+
+.answer:disabled {
+    cursor: default;
+    opacity: .8;
+}
+
+.answer.correct {
+    background: #397d6344;
+    border-color: #73c6a2;
+}
+
+.answer.wrong {
+    background: #b94c7044;
+    border-color: #e88da0;
+}
+
+/* FEEDBACK */
+
+.feedback {
+    display: none;
+    background: #ffffff0b;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+    text-align: left;
+    line-height: 1.7;
+    animation: enter .5s ease;
+}
+
+.feedback.show {
+    display: block;
+}
+
+/* PROGRESSO */
+
+.progress {
+    width: min(700px, 95%);
+    height: 6px;
+    background: #ffffff22;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg,#d77896,#f4c3ce);
+    transition: .5s;
+}
+
+/* RISULTATO */
+
+.big-heart {
+    font-size: 65px;
+    animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* CONTATTI */
+
+.contact {
+    width: min(650px, 95%);
+    background: #ffffff0c;
+    border: 1px solid #ffffff20;
+    padding: 22px;
+    border-radius: 18px;
+    margin: 12px;
+}
+
+.contact a {
+    color: #f2afc1;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.number {
+    font-size: 38px;
+    color: #f3b0c3;
+    font-weight: 800;
+    margin: 8px;
+}
+
+footer {
+    color: #a99aaa;
+    font-size: 12px;
+    margin-top: 25px;
+}
+
+@media(max-width:600px) {
+    .game-card { padding: 23px; }
+    .question { font-size: 21px; }
+    .screen { padding: 20px 12px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<!-- PARTICELLE -->
+
+<div id="particles"></div>
+
+<!-- INTRODUZIONE -->
+
+<section class="screen active" id="intro">
+
+    <div class="badge">25 NOVEMBRE · EDUCAZIONE E CONSAPEVOLEZZA</div>
+
+    <div class="character">
+        <div class="hair"></div>
+        <div class="face"></div>
+        <div class="eyes">
+            <span></span><span></span>
+        </div>
+        <div class="mouth"></div>
+        <div class="neck"></div>
+        <div class="dress"></div>
+    </div>
+
+    <h1>Ci sono segnali<br>che non dovremmo ignorare.</h1>
+
+    <p>
+        La violenza non inizia sempre con uno schiaffo.
+        A volte comincia con una domanda, un divieto,
+        un controllo presentato come amore.
+    </p>
+
+    <p>
+        Sei pronta a riconoscere alcuni campanelli d'allarme?
+    </p>
+
+    <button class="btn primary" onclick="startGame()">
+        INIZIA IL PERCORSO →
+    </button>
+
+    <p style="font-size:12px">
+        Un'esperienza educativa. Non è un test diagnostico.
+    </p>
+
+</section>
+
+
+<!-- GIOCO -->
+
+<section class="screen" id="game">
+
+    <div class="badge" id="category">RICONOSCERE I SEGNALI</div>
+
+    <div class="progress">
+        <div class="progress-fill" id="bar"></div>
+    </div>
+
+    <div class="game-card">
+
+        <div id="counter"></div>
+
+        <div class="question" id="question"></div>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <button
+            class="btn primary"
+            id="next"
+            style="display:none"
+            onclick="nextQuestion()">
+
+            CONTINUA →
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- AIUTARE UN'AMICA -->
+
+<section class="screen" id="friend">
+
+    <div class="badge">NON VOLTARTI DALL'ALTRA PARTE</div>
+
+    <div class="big-heart">💗</div>
+
+    <h1>Una tua amica ti confida che ha paura del suo partner.</h1>
+
+    <p>
+        Ti racconta che lui controlla il telefono,
+        decide con chi può uscire e si arrabbia quando
+        lei vuole vedere le amiche.
+    </p>
+
+    <div class="game-card">
+
+        <h2>Cosa puoi fare?</h2>
+
+        <div class="answers" id="friendAnswers">
+
+            <button class="answer" onclick="friendChoice(1)">
+                «Devi lasciarlo immediatamente, non capisco perché resti».
+            </button>
+
+            <button class="answer" onclick="friendChoice(2)">
+                Ascoltarla senza giudicarla, dirle che merita rispetto
+                e offrirle aiuto per trovare un supporto sicuro.
+            </button>
+
+            <button class="answer" onclick="friendChoice(3)">
+                Affrontare direttamente il partner per costringerlo a cambiare.
+            </button>
+
+        </div>
+
+        <div class="feedback" id="friendFeedback"></div>
+
+        <button class="btn primary" id="friendNext"
+            style="display:none"
+            onclick="showScreen('reflection')">
+
+            PROSEGUI →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- RIFLESSIONE -->
+
+<section class="screen" id="reflection">
+
+    <div class="badge">FERMATI A RIFLETTERE</div>
+
+    <h1>La violenza non è amore.</h1>
+
+    <p>
+        Non è amore controllare.<br>
+        Non è amore isolare.<br>
+        Non è amore minacciare.<br>
+        Non è amore decidere al posto di un'altra persona.
+    </p>
+
+    <div class="game-card">
+
+        <div class="big-heart">🦋</div>
+
+        <h2>Ricorda una cosa importante.</h2>
+
+        <p>
+            Chi vive una relazione violenta non ha colpe.
+            Uscirne può essere difficile e richiedere tempo,
+            sostegno e protezione.
+        </p>
+
+        <p>
+            Essere un'amica significa esserci,
+            ascoltare e aiutare senza imporre decisioni.
+        </p>
+
+        <button class="btn primary" onclick="showScreen('contacts')">
+            SCOPRI COME CHIEDERE AIUTO →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- CONTATTI -->
+
+<section class="screen" id="contacts">
+
+    <div class="badge">NON SEI SOLA</div>
+
+    <h1>Chiedere aiuto è un atto di coraggio.</h1>
+
+    <p>
+        Se riconosci questi segnali nella tua vita
+        o in quella di una persona cara,
+        esistono servizi specializzati pronti ad ascoltarti.
+    </p>
+
+    <div class="contact">
+
+        <h2>1522</h2>
+
+        <div class="number">1522</div>
+
+        <p>
+            Numero nazionale antiviolenza e stalking.
+            Gratuito, attivo 24 ore su 24,
+            tutti i giorni dell'anno.
+        </p>
+
+        <p>
+            Puoi chiedere ascolto, informazioni e orientamento.
+        </p>
+
+        <a href="tel:1522">CHIAMA IL 1522</a>
+
+        <br><br>
+
+        <a href="https://www.1522.eu/" target="_blank">
+            ACCEDI ALLA CHAT UFFICIALE →
+        </a>
+
+    </div>
+
+
+    <div class="contact">
+
+        <h2>112</h2>
+
+        <div class="number">112</div>
+
+        <p>
+            Numero unico europeo per le emergenze.
+            Se tu o un'altra persona siete in pericolo immediato,
+            chiama il 112 appena puoi farlo in sicurezza.
+        </p>
+
+        <a href="tel:112">CHIAMA IL 112</a>
+
+    </div>
+
+
+    <div class="contact">
+
+        <h2>Trova un centro antiviolenza</h2>
+
+        <p>
+            Puoi trovare i servizi territoriali
+            attraverso la mappatura ufficiale.
+        </p>
+
+        <a href="https://www.1522.eu/" target="_blank">
+            CERCA UN CENTRO VICINO A TE →
+        </a>
+
+    </div>
+
+    <h2 style="margin-top:35px">
+        Non minimizzare. Non giudicare. Ascolta.
+    </h2>
+
+    <p>
+        A volte, esserci può essere il primo passo
+        per cambiare una storia.
+    </p>
+
+    <div class="big-heart">💗</div>
+
+    <h1 style="font-size:35px">
+        L'amore lascia libere.
+    </h1>
+
+    <p>
+        25 NOVEMBRE<br>
+        Giornata internazionale per l'eliminazione
+        della violenza contro le donne.
+    </p>
+
+    <button class="btn secondary" onclick="restart()">
+        RICOMINCIA IL PERCORSO
+    </button>
+
+    <footer>
+        Progetto educativo di sensibilizzazione.
+        Le risposte non vengono salvate né inviate.
+    </footer>
+
+</section>
+
+</div>
+
+
+<script>
+
+/* PARTICELLE ANIMATE */
+
+const particleContainer =
+document.getElementById("particles");
+
+for(let i=0; i<25; i++){
+
+    let p = document.createElement("div");
+
+    p.className = "particle";
+
+    p.innerHTML = ["✦","✧","♡","·"][i%4];
+
+    p.style.left = Math.random()*100 + "%";
+
+    p.style.animationDuration =
+    (8 + Math.random()*12) + "s";
+
+    p.style.animationDelay =
+    Math.random()*10 + "s";
+
+    p.style.fontSize =
+    (12 + Math.random()*20) + "px";
+
+    particleContainer.appendChild(p);
+
+}
+
+
+/* GESTIONE SCHERMATE */
+
+function showScreen(id){
+
+    document.querySelectorAll(".screen")
+    .forEach(s => s.classList.remove("active"));
+
+    document.getElementById(id)
+    .classList.add("active");
+
+    window.scrollTo(0,0);
+
+}
+
+
+/* DOMANDE */
+
+const questions = [
+
+{
+category:"CONTROLLO",
+question:"Il partner vuole conoscere ogni tuo spostamento e pretende che tu risponda immediatamente a ogni messaggio. Se non lo fai, si arrabbia. È un segnale d'allarme?",
+answers:[
+"È normale, significa che tiene molto a te.",
+"Può essere una forma di controllo e limitazione della libertà.",
+"È semplicemente una questione di carattere."
+],
+correct:1,
+explanation:"Pretendere di conoscere ogni spostamento e controllare continuamente le risposte può essere una forma di controllo coercitivo. L'affetto non dà diritto a controllare la libertà di un'altra persona."
+},
+
+{
+category:"ISOLAMENTO",
+question:"Una ragazza smette gradualmente di frequentare le amiche perché il partner dice che sono una cattiva influenza e crea discussioni ogni volta che esce. Cosa osservi?",
+answers:[
+"Una normale fase di coppia.",
+"Un possibile tentativo di isolarla dalla sua rete di sostegno.",
+"Una dimostrazione di amore."
+],
+correct:1,
+explanation:"L'isolamento da amici e familiari può rendere una persona più vulnerabile e dipendente. Mantenere relazioni e autonomia è importante."
+},
+
+{
+category:"GELOSIA",
+question:"Il partner controlla il telefono, legge le chat e pretende le password dei social. Dice che in una coppia non devono esistere segreti. È accettabile?",
+answers:[
+"Sì, se non hai niente da nascondere.",
+"No. La privacy e il rispetto dei confini personali restano importanti anche in coppia.",
+"Dipende da quanto è geloso."
+],
+correct:1,
+explanation:"La condivisione delle password non deve essere imposta. La sorveglianza e l'invasione della privacy possono essere segnali di una relazione di controllo."
+},
+
+{
+category:"RICATTO EMOTIVO",
+question:"Durante una discussione, lui dice: «Se mi lasci, mi faccio del male. Sarà colpa tua». Come interpreti questa frase?",
+answers:[
+"È una prova di quanto sia innamorato.",
+"È una forma di pressione e ricatto emotivo, da prendere seriamente.",
+"È una frase detta per rabbia, quindi non conta."
+],
+correct:1,
+explanation:"Le minacce di autolesionismo devono essere prese sul serio, ma non rendono una persona responsabile delle azioni del partner. È importante coinvolgere servizi di emergenza o professionisti, senza affrontare da soli la situazione."
+},
+
+{
+category:"VIOLENZA PSICOLOGICA",
+question:"Dopo ogni litigio, lui dice che lei è pazza, esagera e inventa tutto. Con il tempo lei inizia a dubitare della propria memoria e percezione. Che cosa può indicare?",
+answers:[
+"Una normale incomprensione.",
+"Una possibile forma di manipolazione psicologica, talvolta chiamata gaslighting.",
+"Una mancanza di comunicazione da parte di lei."
+],
+correct:1,
+explanation:"Il gaslighting è una forma di manipolazione che può portare una persona a dubitare della propria percezione della realtà. Non è una normale discussione."
+}
+
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+
+/* AVVIO */
+
+function startGame(){
+
+    current = 0;
+    score = 0;
+
+    showScreen("game");
+
+    renderQuestion();
+
+}
+
+
+/* RENDER DOMANDA */
+
+function renderQuestion(){
+
+    answered = false;
+
+    let q = questions[current];
+
+    document.getElementById("category")
+    .innerText = q.category;
+
+    document.getElementById("counter")
+    .innerText =
+    "SITUAZIONE " + (current+1) + " DI " + questions.length;
+
+    document.getElementById("bar").style.width =
+    (current/questions.length*100) + "%";
+
+    document.getElementById("question")
+    .innerText = q.question;
+
+    document.getElementById("feedback")
+    .classList.remove("show");
+
+    document.getElementById("next").style.display = "none";
+
+    let html = "";
+
+    q.answers.forEach((answer,index)=>{
+
+        html += `
+        <button class="answer"
+        onclick="chooseAnswer(${index})">
+        ${answer}
+        </button>`;
+
+    });
+
+    document.getElementById("answers").innerHTML = html;
+
+}
+
+
+/* SCELTA RISPOSTA */
+
+function chooseAnswer(index){
+
+    if(answered) return;
+
+    answered = true;
+
+    let q = questions[current];
+
+    let buttons =
+    document.querySelectorAll("#answers .answer");
+
+    buttons.forEach((b,i)=>{
+
+        b.disabled = true;
+
+        if(i === q.correct){
+            b.classList.add("correct");
+        }
+
+        if(i === index && index !== q.correct){
+            b.classList.add("wrong");
+        }
+
+    });
+
+    if(index === q.correct){
+        score++;
+    }
+
+    let feedback =
+    document.getElementById("feedback");
+
+    feedback.innerHTML = `
+    <strong>
+    ${index === q.correct ?
+    "✓ Hai individuato il segnale." :
+    "💡 Fermiamoci a riflettere."}
+    </strong>
+    <br><br>
+    ${q.explanation}
+    `;
+
+    feedback.classList.add("show");
+
+    document.getElementById("next").style.display =
+    "inline-block";
+
+}
+
+
+/* AVANTI */
+
+function nextQuestion(){
+
+    current++;
+
+    if(current < questions.length){
+
+        renderQuestion();
+
+    } else {
+
+        document.getElementById("bar").style.width = "100%";
+
+        showScreen("friend");
+
+    }
+
+}
+
+
+/* AIUTARE UN'AMICA */
+
+function friendChoice(choice){
+
+    let feedback =
+    document.getElementById("friendFeedback");
+
+    let answers =
+    document.querySelectorAll("#friendAnswers .answer");
+
+    answers.forEach((a,i)=>{
+
+        a.disabled = true;
+
+        if(i === 1){
+            a.classList.add("correct");
+        }
+
+        if(i+1 === choice && choice !== 2){
+            a.classList.add("wrong");
+        }
+
+    });
+
+    if(choice === 2){
+
+        feedback.innerHTML = `
+        <strong>💗 Esatto. Ascoltare è fondamentale.</strong><br><br>
+        Credere alla persona, non giudicarla,
+        rispettare i suoi tempi e aiutarla a trovare
+        un servizio specializzato sono gesti importanti.
+        Non bisogna costringerla a prendere decisioni
+        né affrontare direttamente il partner.
+        `;
+
+    } else {
+
+        feedback.innerHTML = `
+        <strong>Fermiamoci a riflettere.</strong><br><br>
+        Anche se nasce da buone intenzioni,
+        giudicare, imporre decisioni o affrontare
+        direttamente il partner può aumentare
+        il rischio. Meglio ascoltare, rispettare
+        i tempi della persona e cercare un supporto
+        specializzato, pensando prima alla sicurezza.
+        `;
+
+    }
+
+    feedback.classList.add("show");
+
+    document.getElementById("friendNext").style.display =
+    "inline-block";
+
+}
+
+
+/* RICOMINCIA */
+
+function restart(){
+
+    current = 0;
+    score = 0;
+
+    showScreen("intro");
+
+}
+
+</script>
+
+</body>
+</html>
