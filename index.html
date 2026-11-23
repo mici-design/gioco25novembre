@@ -27,20 +27,31 @@
 }
 
 body {
-    background: var(--bg);
+    background-color: var(--bg);
     color: var(--white);
     font-family: 'DM Sans', sans-serif;
     overflow-x: hidden;
 }
 
-#app {
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
+/* FIX SFONDO MOBILE: Mantiene lo sfondo fisso e non lo deforma allo scroll */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background:
     radial-gradient(circle at 10% 20%, #75425b55, transparent 35%),
     radial-gradient(circle at 90% 80%, #533c7555, transparent 35%),
     var(--bg);
+    z-index: -1;
+}
+
+#app {
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
 }
 
 /* PARTICELLE */
@@ -124,83 +135,123 @@ p {
     margin: 12px auto;
 }
 
-/* PERSONAGGIO */
+/* PERSONAGGIO MIGLIORATO */
 
 .character {
-    width: 155px;
-    height: 175px;
+    width: 140px;
+    height: 160px;
     position: relative;
     margin: 20px auto;
     animation: float 4s ease-in-out infinite;
 }
 
-.face {
-    width: 115px;
-    height: 130px;
-    background: #eab59f;
-    border-radius: 48% 48% 45% 45%;
+.hair-back {
+    width: 140px;
+    height: 150px;
+    background: #392638;
+    border-radius: 70px 70px 30px 30px;
     position: absolute;
-    left: 20px;
-    top: 15px;
-    z-index: 2;
+    left: 0;
+    top: 10px;
+    z-index: 1;
 }
 
-.hair {
-    width: 130px;
-    height: 145px;
-    background: #392638;
-    border-radius: 50% 50% 35% 35%;
+.face {
+    width: 100px;
+    height: 110px;
+    background: #ffe0d1;
+    border-radius: 50px 50px 45px 45px;
     position: absolute;
-    left: 12px;
-    top: 5px;
-    z-index: 1;
+    left: 20px;
+    top: 25px;
+    z-index: 2;
+    box-shadow: inset 0 -8px 0 #f0c8b6;
+}
+
+.hair-front {
+    width: 130px;
+    height: 50px;
+    background: #392638;
+    border-radius: 65px 65px 0 0;
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    z-index: 3;
+}
+
+.hair-bang {
+    width: 60px;
+    height: 35px;
+    background: #392638;
+    border-radius: 0 0 50px 0;
+    position: absolute;
+    left: 5px;
+    top: 40px;
+    z-index: 3;
 }
 
 .eyes {
     position: absolute;
-    top: 58px;
-    left: 38px;
+    top: 45px;
+    left: 22px;
     display: flex;
-    gap: 34px;
-    z-index: 3;
+    gap: 36px;
+    z-index: 4;
 }
 
 .eyes span {
     background: #35232b;
-    width: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.blush {
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    display: flex;
+    gap: 56px;
+    z-index: 3;
+}
+
+.blush span {
+    background: #ffb6c188;
+    width: 12px;
     height: 8px;
     border-radius: 50%;
 }
 
 .mouth {
     position: absolute;
-    top: 88px;
-    left: 55px;
-    width: 25px;
-    height: 12px;
-    border-bottom: 2px solid #914e5b;
+    top: 65px;
+    left: 42px;
+    width: 16px;
+    height: 8px;
+    border-bottom: 2.5px solid #d47e8e;
     border-radius: 50%;
-    z-index: 3;
+    z-index: 4;
 }
 
 .neck {
     position: absolute;
-    width: 35px;
-    height: 40px;
-    background: #eab59f;
-    left: 60px;
-    top: 130px;
+    width: 30px;
+    height: 30px;
+    background: #f0c8b6;
+    left: 55px;
+    top: 120px;
     z-index: 1;
 }
 
 .dress {
     position: absolute;
-    top: 150px;
+    top: 140px;
     left: 15px;
-    width: 125px;
-    height: 85px;
-    background: #a44f70;
+    width: 110px;
+    height: 60px;
+    background: linear-gradient(135deg, #b94c70, #8a3652);
     border-radius: 40px 40px 10px 10px;
+    z-index: 4;
 }
 
 @keyframes float {
@@ -409,13 +460,15 @@ footer {
     <div class="badge">25 NOVEMBRE · EDUCAZIONE E CONSAPEVOLEZZA</div>
 
     <div class="character">
-        <div class="hair"></div>
-        <div class="face"></div>
-        <div class="eyes">
-            <span></span><span></span>
-        </div>
-        <div class="mouth"></div>
+        <div class="hair-back"></div>
+        <div class="hair-front"></div>
+        <div class="hair-bang"></div>
         <div class="neck"></div>
+        <div class="face">
+            <div class="eyes"><span></span><span></span></div>
+            <div class="blush"><span></span><span></span></div>
+            <div class="mouth"></div>
+        </div>
         <div class="dress"></div>
     </div>
 
