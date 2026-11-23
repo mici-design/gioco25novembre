@@ -1,1134 +1,1052 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promo Video 9:16 - Campanelli d'allarme</title>
-    <!-- Caricamento Tailwind CSS per layout e controlli esterni -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Caricamento Tone.js per effetti sonori sintetizzati (notifica, click, battito) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <!-- Google Fonts identici alla web app originale -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg: #171320;
-            --panel: #282033;
-            --card: #30263c;
-            --pink: #e8a1b3;
-            --red: #b94c70;
-            --white: #fff4f5;
-            --muted: #c5b5c6;
-            --green: #397d63;
-            --green-light: #73c6a2;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
-
-        body {
-            background-color: #0d0a12;
-            color: var(--white);
-            font-family: 'DM Sans', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-        }
-
-        /* Contenitore 9:16 perfetto per Reels / Stories / Screen Recording */
-        .video-stage {
-            position: relative;
-            width: 100%;
-            max-width: 405px; /* Proporzione 9:16 su 720px di altezza */
-            height: 720px;
-            max-height: 88vh;
-            aspect-ratio: 9 / 16;
-            background: 
-                radial-gradient(circle at 15% 20%, #75425b66, transparent 45%),
-                radial-gradient(circle at 85% 80%, #533c7566, transparent 45%),
-                var(--bg);
-            border-radius: 28px;
-            overflow: hidden;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(232, 161, 179, 0.2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Su mobile occupa tutto lo schermo */
-        @media (max-width: 480px) {
-            .video-stage {
-                max-width: 100vw;
-                height: 100dvh;
-                max-height: 100dvh;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            .controls-bar {
-                position: fixed;
-                bottom: 12px;
-                z-index: 50;
-                background: rgba(23, 19, 32, 0.85);
-                backdrop-filter: blur(10px);
-                padding: 8px 14px;
-                border-radius: 999px;
-                border: 1px solid rgba(255,255,255,0.15);
-            }
-        }
-
-        /* Modalità schermo intero pulita per registrazione */
-        body.recording-mode .controls-bar,
-        body.recording-mode .header-info {
-            display: none !important;
-        }
-        body.recording-mode .video-stage {
-            max-height: 96vh;
-            height: 96vh;
-        }
-
-        /* Particelle fluttuanti identiche all'app */
-        .particle {
-            position: absolute;
-            color: rgba(232, 161, 179, 0.35);
-            pointer-events: none;
-            animation: rise linear infinite;
-            z-index: 1;
-        }
-
-        @keyframes rise {
-            0% { transform: translateY(750px) rotate(0deg); opacity: 0; }
-            15% { opacity: 1; }
-            85% { opacity: 1; }
-            100% { transform: translateY(-50px) rotate(360deg); opacity: 0; }
-        }
-
-        /* Barre progresso stile Storia IG */
-        .ig-progress-container {
-            position: absolute;
-            top: 14px;
-            left: 14px;
-            right: 14px;
-            display: flex;
-            gap: 6px;
-            z-index: 30;
-        }
-
-        .ig-segment {
-            flex: 1;
-            height: 3.5px;
-            background: rgba(255, 244, 245, 0.22);
-            border-radius: 4px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .ig-segment-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--white);
-            border-radius: 4px;
-            transition: width 0.05s linear;
-        }
-
-        /* Header discreto interno al video */
-        .ig-header {
-            position: absolute;
-            top: 26px;
-            left: 16px;
-            right: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 30;
-        }
-
-        .brand-pill {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--white);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        .brand-dot {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #d77896, #a64a73);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            box-shadow: 0 0 12px rgba(215, 120, 150, 0.6);
-        }
-
-        /* Scene */
-        .scene {
-            position: absolute;
-            inset: 0;
-            padding: 70px 24px 36px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.96);
-            transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .scene.active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: scale(1);
-        }
-
-        .serif {
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* --- PERSONAGGIO MIGLIORATO (SOLO SCENA 1) --- */
-        .character {
-            width: 140px;
-            height: 175px;
-            position: relative;
-            margin: 0 auto 12px;
-            animation: float 4s ease-in-out infinite;
-            transform-origin: center bottom;
-        }
-
-        .hair-back {
-            width: 140px;
-            height: 150px;
-            background: #392638;
-            border-radius: 70px 70px 30px 30px;
-            position: absolute;
-            left: 0;
-            top: 10px;
-            z-index: 1;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-        }
-
-        .face {
-            width: 100px;
-            height: 110px;
-            background: #ffe0d1;
-            border-radius: 50px 50px 45px 45px;
-            position: absolute;
-            left: 20px;
-            top: 25px;
-            z-index: 2;
-            box-shadow: inset 0 -8px 0 #f0c8b6;
-        }
-
-        .hair-front {
-            width: 130px;
-            height: 50px;
-            background: #392638;
-            border-radius: 65px 65px 0 0;
-            position: absolute;
-            left: 5px;
-            top: 10px;
-            z-index: 3;
-        }
-
-        .hair-bang {
-            width: 60px;
-            height: 35px;
-            background: #392638;
-            border-radius: 0 0 50px 0;
-            position: absolute;
-            left: 5px;
-            top: 40px;
-            z-index: 3;
-        }
-
-        .eyes {
-            position: absolute;
-            top: 45px;
-            left: 22px;
-            display: flex;
-            gap: 36px;
-            z-index: 4;
-        }
-
-        .eyes span {
-            background: #35232b;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: blink 4s infinite;
-        }
-
-        @keyframes blink {
-            0%, 96%, 100% { transform: scaleY(1); }
-            98% { transform: scaleY(0.1); }
-        }
-
-        .blush {
-            position: absolute;
-            top: 55px;
-            left: 10px;
-            display: flex;
-            gap: 56px;
-            z-index: 3;
-        }
-
-        .blush span {
-            background: #ffb6c188;
-            width: 12px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .mouth {
-            position: absolute;
-            top: 65px;
-            left: 42px;
-            width: 16px;
-            height: 8px;
-            border-bottom: 2.5px solid #d47e8e;
-            border-radius: 50%;
-            z-index: 4;
-            transition: all 0.35s ease;
-        }
-
-        .mouth.sad {
-            border-bottom: none;
-            border-top: 2.5px solid #d47e8e;
-            top: 70px;
-        }
-
-        .neck {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: #f0c8b6;
-            left: 55px;
-            top: 120px;
-            z-index: 1;
-        }
-
-        .dress {
-            position: absolute;
-            top: 140px;
-            left: 15px;
-            width: 110px;
-            height: 55px;
-            background: linear-gradient(135deg, #b94c70, #8a3652);
-            border-radius: 40px 40px 10px 10px;
-            z-index: 4;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(0.82); }
-            50% { transform: translateY(-10px) scale(0.82); }
-        }
-
-        /* --- SCENA 1: HOOK NOTIFICA --- */
-        .notification-stack {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .notif-card {
-            background: rgba(48, 38, 60, 0.92);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(232, 161, 179, 0.35);
-            border-radius: 18px;
-            padding: 12px 15px;
-            text-align: left;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
-            opacity: 0;
-            transform: translateY(-25px) scale(0.92);
-        }
-
-        .notif-card.pop {
-            animation: popNotif 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        .notif-card.shake {
-            animation: popNotif 0.4s forwards, phoneVibrate 0.4s 0.45s ease-in-out;
-        }
-
-        @keyframes popNotif {
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes phoneVibrate {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-6px) rotate(-1deg); }
-            40% { transform: translateX(6px) rotate(1deg); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(4px); }
-        }
-
-        .hook-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 30px;
-            line-height: 1.15;
-            font-weight: 700;
-            color: var(--white);
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.5s ease;
-        }
-
-        .hook-title.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .highlight-pink {
-            color: var(--pink);
-            font-style: italic;
-        }
-
-        /* --- SCENA 2: TENSIONE & PAROLE CHIAVE --- */
-        .keywords-ticker {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin: 0 0 28px;
-        }
-
-        .kw-pill {
-            background: rgba(185, 76, 112, 0.25);
-            border: 1px solid rgba(232, 161, 179, 0.4);
-            color: #f2a8bd;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            opacity: 0.25;
-            transform: scale(0.92);
-            transition: all 0.25s ease;
-        }
-
-        .kw-pill.lit {
-            opacity: 1;
-            transform: scale(1.08);
-            background: var(--red);
-            color: var(--white);
-            box-shadow: 0 0 20px rgba(185, 76, 112, 0.75);
-        }
-
-        /* --- SCENA 3: SIMULAZIONE QUIZ INTERATTIVO --- */
-        .quiz-mockup {
-            width: 100%;
-            background: linear-gradient(145deg, #30263c, #211b2b);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 20px;
-            padding: 15px 14px;
-            text-align: left;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            position: relative;
-        }
-
-        .mock-option {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 12px;
-            padding: 9px 12px;
-            font-size: 12px;
-            line-height: 1.35;
-            color: var(--white);
-            margin-top: 7px;
-            transition: all 0.35s ease;
-            position: relative;
-        }
-
-        .mock-option.selected-wrong {
-            background: rgba(185, 76, 112, 0.38);
-            border-color: var(--pink);
-            transform: scale(1.015);
-            box-shadow: 0 0 18px rgba(185, 76, 112, 0.3);
-        }
-
-        .mock-option.selected-correct {
-            background: rgba(57, 125, 99, 0.38);
-            border-color: var(--green-light);
-            transform: scale(1.015);
-            box-shadow: 0 0 20px rgba(115, 198, 162, 0.28);
-        }
-
-        .mock-option.dimmed {
-            opacity: 0.42;
-        }
-
-        .mock-feedback {
-            margin-top: 10px;
-            background: rgba(255, 255, 255, 0.07);
-            border-left: 3px solid var(--pink);
-            padding: 9px 11px;
-            border-radius: 8px;
-            font-size: 11.5px;
-            line-height: 1.4;
-            color: var(--white);
-            opacity: 0;
-            transform: translateY(6px);
-            transition: all 0.35s ease;
-        }
-
-        .mock-feedback.reflect {
-            background: rgba(185, 76, 112, 0.18);
-            border-left-color: var(--pink);
-        }
-
-        .mock-feedback.success {
-            background: rgba(115, 198, 162, 0.16);
-            border-left-color: var(--green-light);
-        }
-
-        .mock-feedback.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Cursore/Tocco animato */
-        .touch-cursor {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 244, 245, 0.35);
-            border: 2px solid var(--white);
-            box-shadow: 0 0 15px rgba(232, 161, 179, 0.8);
-            pointer-events: none;
-            z-index: 25;
-            right: 22px;
-            bottom: 16px;
-            opacity: 0;
-            transition: all 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .touch-cursor::after {
-            content: '👆';
-            position: absolute;
-            font-size: 19px;
-            top: 7px;
-            left: 7px;
-        }
-
-        .touch-cursor.tap-pulse {
-            transform: scale(0.75);
-            background: rgba(232, 161, 179, 0.85);
-        }
-
-        .mock-option {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 13px;
-            padding: 12px 14px;
-            font-size: 13px;
-            line-height: 1.4;
-            color: var(--white);
-            margin-top: 10px;
-            transition: all 0.35s ease;
-            position: relative;
-        }
-
-        .mock-option.selected-correct {
-            background: rgba(57, 125, 99, 0.35);
-            border-color: var(--green-light);
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(115, 198, 162, 0.25);
-        }
-
-        .mock-option.dimmed {
-            opacity: 0.45;
-        }
-
-        .mock-feedback {
-            margin-top: 12px;
-            background: rgba(115, 198, 162, 0.14);
-            border-left: 3px solid var(--green-light);
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            line-height: 1.45;
-            color: var(--white);
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.4s ease;
-        }
-
-        .mock-feedback.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Cursore/Tocco animato */
-        .touch-cursor {
-            position: absolute;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: rgba(255, 244, 245, 0.35);
-            border: 2px solid var(--white);
-            box-shadow: 0 0 15px rgba(232, 161, 179, 0.8);
-            pointer-events: none;
-            z-index: 25;
-            right: 25px;
-            bottom: 20px;
-            opacity: 0;
-            transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .touch-cursor::after {
-            content: '👆';
-            position: absolute;
-            font-size: 20px;
-            top: 8px;
-            left: 8px;
-        }
-
-        .touch-cursor.tap-pulse {
-            transform: scale(0.75);
-            background: rgba(232, 161, 179, 0.8);
-        }
-
-        /* --- SCENA 4: CALL TO ACTION FINALE --- */
-        .heart-pulse {
-            font-size: 58px;
-            animation: heartbeat 1.2s infinite;
-            filter: drop-shadow(0 0 20px rgba(232, 161, 179, 0.5));
-        }
-
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.18); }
-            45% { transform: scale(1.04); }
-            65% { transform: scale(1.22); }
-        }
-
-        /* Adesivo Link stile Instagram Stories */
-        .ig-link-sticker {
-            margin-top: 22px;
-            background: var(--white);
-            color: #171320;
-            padding: 14px 24px;
-            border-radius: 16px;
-            font-weight: 800;
-            font-size: 16px;
-            letter-spacing: 0.4px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 12px 35px rgba(232, 161, 179, 0.45);
-            animation: stickerBounce 2s infinite;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .ig-link-icon {
-            background: linear-gradient(135deg, #d77896, #a64a73);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        @keyframes stickerBounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-6px) scale(1.04); }
-        }
-
-        .helpline-badge {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 14px;
-            padding: 10px 16px;
-            font-size: 12px;
-            color: var(--muted);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Campanelli d'allarme</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
+:root {
+    --bg: #171320;
+    --panel: #282033;
+    --pink: #e8a1b3;
+    --red: #b94c70;
+    --white: #fff4f5;
+    --muted: #c5b5c6;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+}
+
+/* FIX SFONDO MOBILE: Mantiene lo sfondo fisso e non lo deforma allo scroll */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background:
+    radial-gradient(circle at 10% 20%, #75425b55, transparent 35%),
+    radial-gradient(circle at 90% 80%, #533c7555, transparent 35%),
+    var(--bg);
+    z-index: -1;
+}
+
+#app {
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* PARTICELLE */
+
+.particle {
+    position: fixed;
+    color: #e8a1b355;
+    pointer-events: none;
+    animation: rise linear infinite;
+    z-index: 0;
+}
+
+@keyframes rise {
+    from {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    20% { opacity: 1; }
+
+    to {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* SCHERMATE */
+
+.screen {
+    display: none;
+    min-height: 100vh;
+    padding: 35px 20px;
+    position: relative;
+    z-index: 2;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.screen.active {
+    display: flex;
+    animation: enter .7s ease;
+}
+
+@keyframes enter {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* TIPOGRAFIA */
+
+h1, h2 {
+    font-family: 'Playfair Display', serif;
+}
+
+h1 {
+    font-size: clamp(38px, 7vw, 75px);
+    line-height: 1.1;
+    max-width: 850px;
+    margin: 20px auto;
+}
+
+h2 {
+    font-size: clamp(28px, 5vw, 43px);
+    margin-bottom: 20px;
+}
+
+p {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 17px;
+    max-width: 650px;
+    margin: 12px auto;
+}
+
+/* PERSONAGGIO MIGLIORATO */
+
+.character {
+    width: 140px;
+    height: 160px;
+    position: relative;
+    margin: 20px auto;
+    animation: float 4s ease-in-out infinite;
+}
+
+.hair-back {
+    width: 140px;
+    height: 150px;
+    background: #392638;
+    border-radius: 70px 70px 30px 30px;
+    position: absolute;
+    left: 0;
+    top: 10px;
+    z-index: 1;
+}
+
+.face {
+    width: 100px;
+    height: 110px;
+    background: #ffe0d1;
+    border-radius: 50px 50px 45px 45px;
+    position: absolute;
+    left: 20px;
+    top: 25px;
+    z-index: 2;
+    box-shadow: inset 0 -8px 0 #f0c8b6;
+}
+
+.hair-front {
+    width: 130px;
+    height: 50px;
+    background: #392638;
+    border-radius: 65px 65px 0 0;
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    z-index: 3;
+}
+
+.hair-bang {
+    width: 60px;
+    height: 35px;
+    background: #392638;
+    border-radius: 0 0 50px 0;
+    position: absolute;
+    left: 5px;
+    top: 40px;
+    z-index: 3;
+}
+
+.eyes {
+    position: absolute;
+    top: 45px;
+    left: 22px;
+    display: flex;
+    gap: 36px;
+    z-index: 4;
+}
+
+.eyes span {
+    background: #35232b;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.blush {
+    position: absolute;
+    top: 55px;
+    left: 10px;
+    display: flex;
+    gap: 56px;
+    z-index: 3;
+}
+
+.blush span {
+    background: #ffb6c188;
+    width: 12px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.mouth {
+    position: absolute;
+    top: 65px;
+    left: 42px;
+    width: 16px;
+    height: 8px;
+    border-bottom: 2.5px solid #d47e8e;
+    border-radius: 50%;
+    z-index: 4;
+}
+
+.neck {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #f0c8b6;
+    left: 55px;
+    top: 120px;
+    z-index: 1;
+}
+
+.dress {
+    position: absolute;
+    top: 140px;
+    left: 15px;
+    width: 110px;
+    height: 60px;
+    background: linear-gradient(135deg, #b94c70, #8a3652);
+    border-radius: 40px 40px 10px 10px;
+    z-index: 4;
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* PULSANTI */
+
+.btn {
+    border: none;
+    border-radius: 40px;
+    padding: 17px 32px;
+    margin: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    transition: .3s;
+}
+
+.primary {
+    background: linear-gradient(120deg, #d77896, #a64a73);
+    color: white;
+    box-shadow: 0 8px 30px #c35d8055;
+}
+
+.btn:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 10px 35px #e88da055;
+}
+
+.secondary {
+    background: #ffffff12;
+    border: 1px solid #ffffff44;
+    color: white;
+}
+
+/* CONTENITORE GIOCO */
+
+.game-card {
+    width: min(700px, 95%);
+    background: linear-gradient(145deg,#30263c,#211b2b);
+    border: 1px solid #ffffff18;
+    border-radius: 25px;
+    padding: 35px;
+    box-shadow: 0 20px 70px #00000055;
+}
+
+.badge {
+    display: inline-block;
+    background: #b94c7033;
+    color: #f2a8bd;
+    padding: 8px 16px;
+    border-radius: 30px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.question {
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    line-height: 1.5;
+    margin: 20px 0;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 25px;
+}
+
+.answer {
+    text-align: left;
+    background: #ffffff0d;
+    border: 1px solid #ffffff22;
+    color: white;
+    border-radius: 15px;
+    padding: 18px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1.5;
+    transition: .3s;
+}
+
+.answer:hover {
+    background: #b94c7033;
+    border-color: var(--pink);
+    transform: translateX(5px);
+}
+
+.answer:disabled {
+    cursor: default;
+    opacity: .8;
+}
+
+.answer.correct {
+    background: #397d6344;
+    border-color: #73c6a2;
+}
+
+.answer.wrong {
+    background: #b94c7044;
+    border-color: #e88da0;
+}
+
+/* FEEDBACK */
+
+.feedback {
+    display: none;
+    background: #ffffff0b;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+    text-align: left;
+    line-height: 1.7;
+    animation: enter .5s ease;
+}
+
+.feedback.show {
+    display: block;
+}
+
+/* PROGRESSO */
+
+.progress {
+    width: min(700px, 95%);
+    height: 6px;
+    background: #ffffff22;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg,#d77896,#f4c3ce);
+    transition: .5s;
+}
+
+/* RISULTATO */
+
+.big-heart {
+    font-size: 65px;
+    animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* CONTATTI */
+
+.contact {
+    width: min(650px, 95%);
+    background: #ffffff0c;
+    border: 1px solid #ffffff20;
+    padding: 22px;
+    border-radius: 18px;
+    margin: 12px;
+}
+
+.contact a {
+    color: #f2afc1;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.number {
+    font-size: 38px;
+    color: #f3b0c3;
+    font-weight: 800;
+    margin: 8px;
+}
+
+footer {
+    color: #a99aaa;
+    font-size: 12px;
+    margin-top: 25px;
+}
+
+@media(max-width:600px) {
+    .game-card { padding: 23px; }
+    .question { font-size: 21px; }
+    .screen { padding: 20px 12px; }
+}
+
+</style>
 </head>
+
 <body>
 
-    <!-- Intestazione esterna per chi registra/usa il promo -->
-    <div class="header-info text-center mb-3 px-4 hidden sm:block">
-        <span class="text-xs uppercase tracking-widest text-[#e8a1b3] font-bold">Anteprima Video Verticale 9:16 · Reels &amp; TikTok</span>
+<div id="app">
+
+<!-- PARTICELLE -->
+
+<div id="particles"></div>
+
+<!-- INTRODUZIONE -->
+
+<section class="screen active" id="intro">
+
+    <div class="badge">25 NOVEMBRE · EDUCAZIONE E CONSAPEVOLEZZA</div>
+
+    <div class="character">
+        <div class="hair-back"></div>
+        <div class="hair-front"></div>
+        <div class="hair-bang"></div>
+        <div class="neck"></div>
+        <div class="face">
+            <div class="eyes"><span></span><span></span></div>
+            <div class="blush"><span></span><span></span></div>
+            <div class="mouth"></div>
+        </div>
+        <div class="dress"></div>
     </div>
 
-    <!-- STAGE VIDEO 9:16 -->
-    <main class="video-stage" id="videoStage">
-        
-        <!-- Particelle fluttuanti di sfondo -->
-        <div id="particles"></div>
+    <h1>Ci sono segnali<br>che non dovremmo ignorare.</h1>
 
-        <!-- Barre di avanzamento stile Storia Instagram -->
-        <div class="ig-progress-container">
-            <div class="ig-segment" onclick="jumpToScene(0)"><div class="ig-segment-fill" id="prog-0"></div></div>
-            <div class="ig-segment" onclick="jumpToScene(1)"><div class="ig-segment-fill" id="prog-1"></div></div>
-            <div class="ig-segment" onclick="jumpToScene(2)"><div class="ig-segment-fill" id="prog-2"></div></div>
-            <div class="ig-segment" onclick="jumpToScene(3)"><div class="ig-segment-fill" id="prog-3"></div></div>
-        </div>
+    <p>
+        La violenza non inizia sempre con uno schiaffo.
+        A volte comincia con una domanda, un divieto,
+        un controllo presentato come amore.
+    </p>
 
-        <!-- Header Storia -->
-        <div class="ig-header">
-            <div class="brand-pill">
-                <div class="brand-dot">🔔</div>
-                <span>CAMPANELLI D'ALLARME</span>
-            </div>
-            <button id="audioToggleBtn" onclick="toggleAudio()" class="text-xs bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 transition">
-                🔇 Audio Off
+    <p>
+        Sei pronta a riconoscere alcuni campanelli d'allarme?
+    </p>
+
+    <button class="btn primary" onclick="startGame()">
+        INIZIA IL PERCORSO →
+    </button>
+
+    <p style="font-size:12px">
+        Un'esperienza educativa. Non è un test diagnostico.
+    </p>
+
+</section>
+
+
+<!-- GIOCO -->
+
+<section class="screen" id="game">
+
+    <div class="badge" id="category">RICONOSCERE I SEGNALI</div>
+
+    <div class="progress">
+        <div class="progress-fill" id="bar"></div>
+    </div>
+
+    <div class="game-card">
+
+        <div id="counter"></div>
+
+        <div class="question" id="question"></div>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <button
+            class="btn primary"
+            id="next"
+            style="display:none"
+            onclick="nextQuestion()">
+
+            CONTINUA →
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- AIUTARE UN'AMICA -->
+
+<section class="screen" id="friend">
+
+    <div class="badge">NON VOLTARTI DALL'ALTRA PARTE</div>
+
+    <div class="big-heart">💗</div>
+
+    <h1>Una tua amica ti confida che ha paura del suo partner.</h1>
+
+    <p>
+        Ti racconta che lui controlla il telefono,
+        decide con chi può uscire e si arrabbia quando
+        lei vuole vedere le amiche.
+    </p>
+
+    <div class="game-card">
+
+        <h2>Cosa puoi fare?</h2>
+
+        <div class="answers" id="friendAnswers">
+
+            <button class="answer" onclick="friendChoice(1)">
+                «Devi lasciarlo immediatamente, non capisco perché resti».
             </button>
+
+            <button class="answer" onclick="friendChoice(2)">
+                Ascoltarla senza giudicarla, dirle che merita rispetto
+                e offrirle aiuto per trovare un supporto sicuro.
+            </button>
+
+            <button class="answer" onclick="friendChoice(3)">
+                Affrontare direttamente il partner per costringerlo a cambiare.
+            </button>
+
         </div>
 
-        <!-- ==========================================
-             SCENA 1: ICONA FEMMINILE + HOOK NOTIFICA (0 - 4.5s)
-             ========================================== -->
-        <section class="scene active" id="scene-0">
-            <!-- Icona femminile migliorata presente SOLO all'inizio -->
-            <div class="character">
-                <div class="hair-back"></div>
-                <div class="hair-front"></div>
-                <div class="hair-bang"></div>
-                <div class="neck"></div>
-                <div class="face">
-                    <div class="eyes"><span></span><span></span></div>
-                    <div class="blush"><span></span><span></span></div>
-                    <div class="mouth" id="charMouth"></div>
-                </div>
-                <div class="dress"></div>
-            </div>
+        <div class="feedback" id="friendFeedback"></div>
 
-            <div class="notification-stack">
-                <div class="notif-card" id="notif-1">
-                    <div class="flex items-center justify-between text-[11px] text-[#e8a1b3] font-bold mb-1">
-                        <span>💬 MESSAGGIO · ORA</span>
-                        <span>3 non letti</span>
-                    </div>
-                    <p class="text-sm text-white font-medium">«Dove sei? Perché non rispondi subito?»</p>
-                </div>
+        <button class="btn primary" id="friendNext"
+            style="display:none"
+            onclick="showScreen('reflection')">
 
-                <div class="notif-card" id="notif-2">
-                    <div class="flex items-center justify-between text-[11px] text-[#e8a1b3] font-bold mb-1">
-                        <span>💬 MESSAGGIO · ADESSO</span>
-                        <span>Urgente</span>
-                    </div>
-                    <p class="text-sm text-white font-medium">«Con chi stai uscendo? Mandami la posizione.»</p>
-                </div>
-            </div>
-
-            <h1 class="hook-title" id="hook-text">
-                È amore...<br>
-                <span class="highlight-pink">o è un campanello d'allarme?</span>
-            </h1>
-        </section>
-
-        <!-- ==========================================
-             SCENA 2: TENSIONE & PAROLE CHIAVE (4.5 - 9s)
-             ========================================== -->
-        <section class="scene" id="scene-1">
-            <div class="keywords-ticker" id="keywordsBox">
-                <span class="kw-pill" data-kw="0">CONTROLLO</span>
-                <span class="kw-pill" data-kw="1">ISOLAMENTO</span>
-                <span class="kw-pill" data-kw="2">GELOSIA</span>
-                <span class="kw-pill" data-kw="3">RICATTO EMOTIVO</span>
-            </div>
-
-            <h2 class="serif text-3xl sm:text-4xl font-bold leading-tight text-[#fff4f5] mb-4">
-                La violenza non inizia sempre con uno schiaffo.
-            </h2>
-            <p class="text-base text-[#c5b5c6] leading-relaxed max-w-xs">
-                A volte comincia con un divieto presentato come protezione.
-            </p>
-        </section>
-
-        <!-- ==========================================
-             SCENA 3: ANTEPRIMA INTERATTIVA QUIZ (9 - 18.5s)
-             ========================================== -->
-        <section class="scene" id="scene-2">
-            <span class="inline-block bg-[#b94c70]/30 text-[#f2a8bd] text-[10px] font-bold tracking-widest px-3 py-1 rounded-full mb-2 border border-[#e8a1b3]/30">
-                METTITI ALLA PROVA · 1 MINUTO
-            </span>
-
-            <h2 class="serif text-xl font-bold text-white mb-2.5">
-                Sai riconoscere i segnali?
-            </h2>
-
-            <div class="quiz-mockup">
-                <div class="text-[10px] uppercase tracking-widest text-[#e8a1b3] font-bold mb-1">
-                    SITUAZIONE 3 DI 5 · GELOSIA
-                </div>
-                <div class="serif text-[14px] font-semibold text-white leading-snug mb-2">
-                    Il partner controlla il telefono, legge le chat e pretende le password dei social. Dice che in una coppia non devono esistere segreti. È accettabile?
-                </div>
-
-                <div class="mock-option" id="opt-0">
-                    Sì, se non hai niente da nascondere.
-                </div>
-
-                <div class="mock-option" id="opt-1">
-                    No. La privacy e il rispetto dei confini personali restano importanti anche in coppia.
-                </div>
-
-                <div class="mock-option" id="opt-2">
-                    Dipende da quanto è geloso.
-                </div>
-
-                <div class="mock-feedback" id="mock-fb"></div>
-
-                <!-- Cursore animato che simula il tap -->
-                <div class="touch-cursor" id="touchCursor"></div>
-            </div>
-        </section>
-
-        <!-- ==========================================
-             SCENA 4: CALL TO ACTION FINALE (14.5 - 19.5s)
-             ========================================== -->
-        <section class="scene" id="scene-3">
-            <span class="inline-block bg-[#b94c70]/30 text-[#f2a8bd] text-[11px] font-bold tracking-widest px-3 py-1 rounded-full mb-4">
-                25 NOVEMBRE · CONSAPEVOLEZZA
-            </span>
-
-            <div class="heart-pulse mb-3">💗</div>
-
-            <h1 class="serif text-4xl font-bold text-white leading-tight mb-3">
-                L'amore<br><span class="text-[#e8a1b3] italic">lascia libere.</span>
-            </h1>
-
-            <p class="text-sm text-[#c5b5c6] max-w-[280px] leading-relaxed">
-                Fai il percorso interattivo gratuito e anonimo per riconoscere i campanelli d'allarme.
-            </p>
-
-            <!-- Adesivo Link stile Instagram -->
-            <div class="ig-link-sticker" onclick="restartVideo()">
-                <span class="ig-link-icon">🔗</span>
-                <span>FAI IL TEST ORA →</span>
-            </div>
-
-            <div class="helpline-badge">
-                Numero Antiviolenza e Stalking: <strong class="text-[#e8a1b3] text-sm">1522</strong> (24h gratuito)
-            </div>
-        </section>
-
-    </main>
-
-    <!-- CONTROLLI ESTERNI PER GESTIONE / REGISTRAZIONE -->
-    <div class="controls-bar mt-4 flex flex-wrap items-center justify-center gap-2 px-3">
-        <button onclick="togglePlay()" id="playPauseBtn" class="bg-[#282033] hover:bg-[#382d47] text-white text-xs font-bold px-4 py-2.5 rounded-full border border-white/15 transition flex items-center gap-1.5">
-            ⏸ Pausa
+            PROSEGUI →
         </button>
-        <button onclick="restartVideo()" class="bg-[#282033] hover:bg-[#382d47] text-white text-xs font-bold px-4 py-2.5 rounded-full border border-white/15 transition">
-            ↺ Riavvia
-        </button>
-        <button onclick="toggleRecordingMode()" class="bg-gradient-to-r from-[#d77896] to-[#a64a73] hover:opacity-90 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg transition" title="Nasconde i pulsanti per registrare lo schermo in modo pulito">
-            🎥 Modalità Registra (Esc per uscire)
-        </button>
+
     </div>
 
-    <script>
-        /* --- GENERAZIONE PARTICELLE DI SFONDO --- */
-        const particleContainer = document.getElementById("particles");
-        const symbols = ["✦", "✧", "♡", "·"];
-        for (let i = 0; i < 22; i++) {
-            const p = document.createElement("div");
-            p.className = "particle";
-            p.innerText = symbols[i % symbols.length];
-            p.style.left = Math.random() * 95 + "%";
-            p.style.animationDuration = (7 + Math.random() * 9) + "s";
-            p.style.animationDelay = (Math.random() * 6) + "s";
-            p.style.fontSize = (12 + Math.random() * 16) + "px";
-            particleContainer.appendChild(p);
+</section>
+
+
+<!-- RIFLESSIONE -->
+
+<section class="screen" id="reflection">
+
+    <div class="badge">FERMATI A RIFLETTERE</div>
+
+    <h1>La violenza non è amore.</h1>
+
+    <p>
+        Non è amore controllare.<br>
+        Non è amore isolare.<br>
+        Non è amore minacciare.<br>
+        Non è amore decidere al posto di un'altra persona.
+    </p>
+
+    <div class="game-card">
+
+        <div class="big-heart">🦋</div>
+
+        <h2>Ricorda una cosa importante.</h2>
+
+        <p>
+            Chi vive una relazione violenta non ha colpe.
+            Uscirne può essere difficile e richiedere tempo,
+            sostegno e protezione.
+        </p>
+
+        <p>
+            Essere un'amica significa esserci,
+            ascoltare e aiutare senza imporre decisioni.
+        </p>
+
+        <button class="btn primary" onclick="showScreen('contacts')">
+            SCOPRI COME CHIEDERE AIUTO →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- CONTATTI -->
+
+<section class="screen" id="contacts">
+
+    <div class="badge">NON SEI SOLA</div>
+
+    <h1>Chiedere aiuto è un atto di coraggio.</h1>
+
+    <p>
+        Se riconosci questi segnali nella tua vita
+        o in quella di una persona cara,
+        esistono servizi specializzati pronti ad ascoltarti.
+    </p>
+
+    <div class="contact">
+
+        <h2>1522</h2>
+
+        <div class="number">1522</div>
+
+        <p>
+            Numero nazionale antiviolenza e stalking.
+            Gratuito, attivo 24 ore su 24,
+            tutti i giorni dell'anno.
+        </p>
+
+        <p>
+            Puoi chiedere ascolto, informazioni e orientamento.
+        </p>
+
+        <a href="tel:1522">CHIAMA IL 1522</a>
+
+        <br><br>
+
+        <a href="https://www.1522.eu/" target="_blank">
+            ACCEDI ALLA CHAT UFFICIALE →
+        </a>
+
+    </div>
+
+
+    <div class="contact">
+
+        <h2>112</h2>
+
+        <div class="number">112</div>
+
+        <p>
+            Numero unico europeo per le emergenze.
+            Se tu o un'altra persona siete in pericolo immediato,
+            chiama il 112 appena puoi farlo in sicurezza.
+        </p>
+
+        <a href="tel:112">CHIAMA IL 112</a>
+
+    </div>
+
+
+    <div class="contact">
+
+        <h2>Trova un centro antiviolenza</h2>
+
+        <p>
+            Puoi trovare i servizi territoriali
+            attraverso la mappatura ufficiale.
+        </p>
+
+        <a href="https://www.1522.eu/" target="_blank">
+            CERCA UN CENTRO VICINO A TE →
+        </a>
+
+    </div>
+
+    <h2 style="margin-top:35px">
+        Non minimizzare. Non giudicare. Ascolta.
+    </h2>
+
+    <p>
+        A volte, esserci può essere il primo passo
+        per cambiare una storia.
+    </p>
+
+    <div class="big-heart">💗</div>
+
+    <h1 style="font-size:35px">
+        L'amore lascia libere.
+    </h1>
+
+    <p>
+        25 NOVEMBRE<br>
+        Giornata internazionale per l'eliminazione
+        della violenza contro le donne.
+    </p>
+
+    <button class="btn secondary" onclick="restart()">
+        RICOMINCIA IL PERCORSO
+    </button>
+
+    <footer>
+        Progetto educativo di sensibilizzazione.
+        Le risposte non vengono salvate né inviate.
+    </footer>
+
+</section>
+
+</div>
+
+
+<script>
+
+/* PARTICELLE ANIMATE */
+
+const particleContainer =
+document.getElementById("particles");
+
+for(let i=0; i<25; i++){
+
+    let p = document.createElement("div");
+
+    p.className = "particle";
+
+    p.innerHTML = ["✦","✧","♡","·"][i%4];
+
+    p.style.left = Math.random()*100 + "%";
+
+    p.style.animationDuration =
+    (8 + Math.random()*12) + "s";
+
+    p.style.animationDelay =
+    Math.random()*10 + "s";
+
+    p.style.fontSize =
+    (12 + Math.random()*20) + "px";
+
+    particleContainer.appendChild(p);
+
+}
+
+
+/* GESTIONE SCHERMATE */
+
+function showScreen(id){
+
+    document.querySelectorAll(".screen")
+    .forEach(s => s.classList.remove("active"));
+
+    document.getElementById(id)
+    .classList.add("active");
+
+    window.scrollTo(0,0);
+
+}
+
+
+/* DOMANDE */
+
+const questions = [
+
+{
+category:"CONTROLLO",
+question:"Il partner vuole conoscere ogni tuo spostamento e pretende che tu risponda immediatamente a ogni messaggio. Se non lo fai, si arrabbia. È un segnale d'allarme?",
+answers:[
+"È normale, significa che tiene molto a te.",
+"Può essere una forma di controllo e limitazione della libertà.",
+"È semplicemente una questione di carattere."
+],
+correct:1,
+explanation:"Pretendere di conoscere ogni spostamento e controllare continuamente le risposte può essere una forma di controllo coercitivo. L'affetto non dà diritto a controllare la libertà di un'altra persona."
+},
+
+{
+category:"ISOLAMENTO",
+question:"Una ragazza smette gradualmente di frequentare le amiche perché il partner dice che sono una cattiva influenza e crea discussioni ogni volta che esce. Cosa osservi?",
+answers:[
+"Una normale fase di coppia.",
+"Un possibile tentativo di isolarla dalla sua rete di sostegno.",
+"Una dimostrazione di amore."
+],
+correct:1,
+explanation:"L'isolamento da amici e familiari può rendere una persona più vulnerabile e dipendente. Mantenere relazioni e autonomia è importante."
+},
+
+{
+category:"GELOSIA",
+question:"Il partner controlla il telefono, legge le chat e pretende le password dei social. Dice che in una coppia non devono esistere segreti. È accettabile?",
+answers:[
+"Sì, se non hai niente da nascondere.",
+"No. La privacy e il rispetto dei confini personali restano importanti anche in coppia.",
+"Dipende da quanto è geloso."
+],
+correct:1,
+explanation:"La condivisione delle password non deve essere imposta. La sorveglianza e l'invasione della privacy possono essere segnali di una relazione di controllo."
+},
+
+{
+category:"RICATTO EMOTIVO",
+question:"Durante una discussione, lui dice: «Se mi lasci, mi faccio del male. Sarà colpa tua». Come interpreti questa frase?",
+answers:[
+"È una prova di quanto sia innamorato.",
+"È una forma di pressione e ricatto emotivo, da prendere seriamente.",
+"È una frase detta per rabbia, quindi non conta."
+],
+correct:1,
+explanation:"Le minacce di autolesionismo devono essere prese sul serio, ma non rendono una persona responsabile delle azioni del partner. È importante coinvolgere servizi di emergenza o professionisti, senza affrontare da soli la situazione."
+},
+
+{
+category:"VIOLENZA PSICOLOGICA",
+question:"Dopo ogni litigio, lui dice che lei è pazza, esagera e inventa tutto. Con il tempo lei inizia a dubitare della propria memoria e percezione. Che cosa può indicare?",
+answers:[
+"Una normale incomprensione.",
+"Una possibile forma di manipolazione psicologica, talvolta chiamata gaslighting.",
+"Una mancanza di comunicazione da parte di lei."
+],
+correct:1,
+explanation:"Il gaslighting è una forma di manipolazione che può portare una persona a dubitare della propria percezione della realtà. Non è una normale discussione."
+}
+
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+
+/* AVVIO */
+
+function startGame(){
+
+    current = 0;
+    score = 0;
+
+    showScreen("game");
+
+    renderQuestion();
+
+}
+
+
+/* RENDER DOMANDA */
+
+function renderQuestion(){
+
+    answered = false;
+
+    let q = questions[current];
+
+    document.getElementById("category")
+    .innerText = q.category;
+
+    document.getElementById("counter")
+    .innerText =
+    "SITUAZIONE " + (current+1) + " DI " + questions.length;
+
+    document.getElementById("bar").style.width =
+    (current/questions.length*100) + "%";
+
+    document.getElementById("question")
+    .innerText = q.question;
+
+    document.getElementById("feedback")
+    .classList.remove("show");
+
+    document.getElementById("next").style.display = "none";
+
+    let html = "";
+
+    q.answers.forEach((answer,index)=>{
+
+        html += `
+        <button class="answer"
+        onclick="chooseAnswer(${index})">
+        ${answer}
+        </button>`;
+
+    });
+
+    document.getElementById("answers").innerHTML = html;
+
+}
+
+
+/* SCELTA RISPOSTA */
+
+function chooseAnswer(index){
+
+    if(answered) return;
+
+    answered = true;
+
+    let q = questions[current];
+
+    let buttons =
+    document.querySelectorAll("#answers .answer");
+
+    buttons.forEach((b,i)=>{
+
+        b.disabled = true;
+
+        if(i === q.correct){
+            b.classList.add("correct");
         }
 
-        /* --- SINTETIZZATORE AUDIO OPZIONALE (TONE.JS) --- */
-        let audioEnabled = false;
-        let synth = null;
-
-        async function toggleAudio() {
-            const btn = document.getElementById("audioToggleBtn");
-            if (!audioEnabled) {
-                try {
-                    await Tone.start();
-                    synth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: "sine" },
-                        envelope: { attack: 0.02, decay: 0.2, sustain: 0.1, release: 0.8 }
-                    }).toDestination();
-                    synth.volume.value = -10;
-                    audioEnabled = true;
-                    btn.innerText = "🔊 Audio On";
-                    btn.classList.add("bg-[#b94c70]/40", "border-[#e8a1b3]");
-                    playSound("notif");
-                } catch (e) {
-                    console.warn("Audio non disponibile:", e);
-                }
-            } else {
-                audioEnabled = false;
-                btn.innerText = "🔇 Audio Off";
-                btn.classList.remove("bg-[#b94c70]/40", "border-[#e8a1b3]");
-            }
+        if(i === index && index !== q.correct){
+            b.classList.add("wrong");
         }
 
-        function playSound(type) {
-            if (!audioEnabled || !synth) return;
-            try {
-                const now = Tone.now();
-                if (type === "notif") {
-                    synth.triggerAttackRelease(["E5", "B5"], "16n", now);
-                } else if (type === "keyword") {
-                    synth.triggerAttackRelease("C3", "32n", now);
-                } else if (type === "wrong") {
-                    synth.triggerAttackRelease(["Eb4", "Bb3"], "8n", now);
-                } else if (type === "success") {
-                    synth.triggerAttackRelease(["C5", "E5", "G5"], "8n", now);
-                } else if (type === "heart") {
-                    synth.triggerAttackRelease("G2", "8n", now);
-                }
-            } catch (e) {}
+    });
+
+    if(index === q.correct){
+        score++;
+    }
+
+    let feedback =
+    document.getElementById("feedback");
+
+    feedback.innerHTML = `
+    <strong>
+    ${index === q.correct ?
+    "✓ Hai individuato il segnale." :
+    "💡 Fermiamoci a riflettere."}
+    </strong>
+    <br><br>
+    ${q.explanation}
+    `;
+
+    feedback.classList.add("show");
+
+    document.getElementById("next").style.display =
+    "inline-block";
+
+}
+
+
+/* AVANTI */
+
+function nextQuestion(){
+
+    current++;
+
+    if(current < questions.length){
+
+        renderQuestion();
+
+    } else {
+
+        document.getElementById("bar").style.width = "100%";
+
+        showScreen("friend");
+
+    }
+
+}
+
+
+/* AIUTARE UN'AMICA */
+
+function friendChoice(choice){
+
+    let feedback =
+    document.getElementById("friendFeedback");
+
+    let answers =
+    document.querySelectorAll("#friendAnswers .answer");
+
+    answers.forEach((a,i)=>{
+
+        a.disabled = true;
+
+        if(i === 1){
+            a.classList.add("correct");
         }
 
-        /* --- TIMELINE E GESTIONE SCENE --- */
-        // Durata in millisecondi di ciascuna delle 4 scene (Scena 3 e 4 allungate per una lettura comoda)
-        const sceneDurations = [4500, 4500, 13000, 6500];
-        let currentScene = 0;
-        let sceneElapsed = 0;
-        let isPlaying = true;
-        let lastFrameTime = performance.now();
-        let animationFrameId = null;
-
-        // Flag per evitare trigger ripetuti all'interno della stessa scena
-        let triggers = {};
-
-        function resetSceneAnimations(sceneIdx) {
-            triggers = {};
-            if (sceneIdx === 0) {
-                const n1 = document.getElementById("notif-1");
-                const n2 = document.getElementById("notif-2");
-                const ht = document.getElementById("hook-text");
-                const mouth = document.getElementById("charMouth");
-                n1.classList.remove("pop", "shake");
-                n2.classList.remove("pop", "shake");
-                ht.classList.remove("visible");
-                mouth.classList.remove("sad");
-            } else if (sceneIdx === 1) {
-                document.querySelectorAll(".kw-pill").forEach(el => el.classList.remove("lit"));
-            } else if (sceneIdx === 2) {
-                [0, 1, 2].forEach(i => {
-                    const opt = document.getElementById(`opt-${i}`);
-                    if (opt) opt.classList.remove("selected-wrong", "selected-correct", "dimmed");
-                });
-                const fb = document.getElementById("mock-fb");
-                fb.className = "mock-feedback";
-                fb.innerHTML = "";
-                const cursor = document.getElementById("touchCursor");
-                cursor.style.opacity = "0";
-                cursor.style.top = "";
-                cursor.style.left = "";
-                cursor.style.right = "22px";
-                cursor.style.bottom = "16px";
-                cursor.style.transform = "scale(1)";
-                cursor.classList.remove("tap-pulse");
-            }
+        if(i+1 === choice && choice !== 2){
+            a.classList.add("wrong");
         }
 
-        function switchScene(newIdx) {
-            currentScene = newIdx;
-            sceneElapsed = 0;
-            resetSceneAnimations(currentScene);
+    });
 
-            document.querySelectorAll(".scene").forEach((el, idx) => {
-                el.classList.toggle("active", idx === currentScene);
-            });
+    if(choice === 2){
 
-            // Aggiorna le barre IG precedenti e successive
-            for (let i = 0; i < sceneDurations.length; i++) {
-                const bar = document.getElementById(`prog-${i}`);
-                if (i < currentScene) bar.style.width = "100%";
-                else if (i > currentScene) bar.style.width = "0%";
-            }
+        feedback.innerHTML = `
+        <strong>💗 Esatto. Ascoltare è fondamentale.</strong><br><br>
+        Credere alla persona, non giudicarla,
+        rispettare i suoi tempi e aiutarla a trovare
+        un servizio specializzato sono gesti importanti.
+        Non bisogna costringerla a prendere decisioni
+        né affrontare direttamente il partner.
+        `;
 
-            if (currentScene === 3) playSound("heart");
-        }
+    } else {
 
-        function jumpToScene(idx) {
-            switchScene(idx);
-            if (!isPlaying) togglePlay();
-        }
+        feedback.innerHTML = `
+        <strong>Fermiamoci a riflettere.</strong><br><br>
+        Anche se nasce da buone intenzioni,
+        giudicare, imporre decisioni o affrontare
+        direttamente il partner può aumentare
+        il rischio. Meglio ascoltare, rispettare
+        i tempi della persona e cercare un supporto
+        specializzato, pensando prima alla sicurezza.
+        `;
 
-        function runSceneChoreography(sceneIdx, t) {
-            // SCENA 1: Notifiche a cascata, cambio espressione volto + Testo Hook
-            if (sceneIdx === 0) {
-                if (t > 250 && !triggers.n1) {
-                    triggers.n1 = true;
-                    document.getElementById("notif-1").classList.add("pop", "shake");
-                    playSound("notif");
-                }
-                if (t > 1300 && !triggers.n2) {
-                    triggers.n2 = true;
-                    document.getElementById("notif-2").classList.add("pop", "shake");
-                    document.getElementById("charMouth").classList.add("sad");
-                    playSound("notif");
-                }
-                if (t > 2300 && !triggers.hook) {
-                    triggers.hook = true;
-                    document.getElementById("hook-text").classList.add("visible");
-                }
-            }
+    }
 
-            // SCENA 2: Accensione ritmica parole chiave
-            if (sceneIdx === 1) {
-                const kwTimes = [400, 1100, 1800, 2500];
-                kwTimes.forEach((time, idx) => {
-                    if (t > time && !triggers[`kw${idx}`]) {
-                        triggers[`kw${idx}`] = true;
-                        const pill = document.querySelector(`.kw-pill[data-kw="${idx}"]`);
-                        if (pill) pill.classList.add("lit");
-                        playSound("keyword");
-                    }
-                });
-            }
+    feedback.classList.add("show");
 
-            // SCENA 3: Doppia interazione (1. Errore + Riflessione -> 2. Risposta Corretta)
-            if (sceneIdx === 2) {
-                const cursor = document.getElementById("touchCursor");
-                const opt0 = document.getElementById("opt-0");
-                const opt1 = document.getElementById("opt-1");
-                const opt2 = document.getElementById("opt-2");
-                const fb = document.getElementById("mock-fb");
-                const explanationText = "La condivisione delle password non deve essere imposta. La sorveglianza e l'invasione della privacy possono essere segnali di una relazione di controllo.";
+    document.getElementById("friendNext").style.display =
+    "inline-block";
 
-                // Fase 1A: Il cursore si sposta sulla prima risposta (errata)
-                if (t > 800 && !triggers.moveWrong) {
-                    triggers.moveWrong = true;
-                    cursor.style.opacity = "1";
-                    cursor.style.bottom = "235px";
-                    cursor.style.right = "65px";
-                }
-                // Fase 1B: Tap sulla risposta errata
-                if (t > 1600 && !triggers.tapWrong) {
-                    triggers.tapWrong = true;
-                    cursor.classList.add("tap-pulse");
-                    opt0.classList.add("selected-wrong");
-                    opt1.classList.add("dimmed");
-                    opt2.classList.add("dimmed");
-                    playSound("wrong");
-                }
-                // Fase 1C: Comparsa box "Fermiamoci a riflettere"
-                if (t > 1950 && !triggers.showReflect) {
-                    triggers.showReflect = true;
-                    cursor.classList.remove("tap-pulse");
-                    fb.innerHTML = `<strong class="text-[#f2a8bd]">💡 Fermiamoci a riflettere.</strong><br>${explanationText}`;
-                    fb.className = "mock-feedback reflect show";
-                }
+}
 
-                // Fase 2A: Il cursore si sposta sulla seconda risposta (corretta) dopo più tempo per la lettura
-                if (t > 7500 && !triggers.moveCorrect) {
-                    triggers.moveCorrect = true;
-                    cursor.style.bottom = "175px";
-                    cursor.style.right = "55px";
-                }
-                // Fase 2B: Tap sulla risposta corretta
-                if (t > 8300 && !triggers.tapCorrect) {
-                    triggers.tapCorrect = true;
-                    cursor.classList.add("tap-pulse");
-                    opt0.classList.remove("selected-wrong");
-                    opt0.classList.add("dimmed");
-                    opt1.classList.remove("dimmed");
-                    opt1.classList.add("selected-correct");
-                    opt2.classList.add("dimmed");
-                    playSound("success");
-                }
-                // Fase 2C: Aggiornamento box feedback in conferma
-                if (t > 8650 && !triggers.showSuccess) {
-                    triggers.showSuccess = true;
-                    cursor.classList.remove("tap-pulse");
-                    cursor.style.opacity = "0";
-                    fb.innerHTML = `<strong class="text-[#73c6a2]">✓ Hai individuato il segnale.</strong><br>${explanationText}`;
-                    fb.className = "mock-feedback success show";
-                }
-            }
-        }
 
-        function animationLoop(now) {
-            const dt = now - lastFrameTime;
-            lastFrameTime = now;
+/* RICOMINCIA */
 
-            if (isPlaying) {
-                sceneElapsed += dt;
-                const duration = sceneDurations[currentScene];
-                const progress = Math.min((sceneElapsed / duration) * 100, 100);
-                document.getElementById(`prog-${currentScene}`).style.width = progress + "%";
+function restart(){
 
-                runSceneChoreography(currentScene, sceneElapsed);
+    current = 0;
+    score = 0;
 
-                if (sceneElapsed >= duration) {
-                    if (currentScene < sceneDurations.length - 1) {
-                        switchScene(currentScene + 1);
-                    } else {
-                        // Loop continuo fluido
-                        switchScene(0);
-                    }
-                }
-            }
+    showScreen("intro");
 
-            animationFrameId = requestAnimationFrame(animationLoop);
-        }
+}
 
-        /* --- AZIONI DI CONTROLLO INTERFACCIA --- */
-        function togglePlay() {
-            isPlaying = !isPlaying;
-            const btn = document.getElementById("playPauseBtn");
-            if (isPlaying) {
-                btn.innerHTML = "⏸ Pausa";
-                lastFrameTime = performance.now();
-                animationFrameId = requestAnimationFrame(animationLoop);
-            } else {
-                btn.innerHTML = "▶️ Play";
-                cancelAnimationFrame(animationFrameId);
-            }
-        }
+</script>
 
-        function restartVideo() {
-            switchScene(0);
-            if (!isPlaying) togglePlay();
-        }
-
-        let recordingMode = false;
-        function toggleRecordingMode() {
-            recordingMode = !recordingMode;
-            if (recordingMode) {
-                document.body.classList.add('recording-mode');
-                restartVideo();
-            } else {
-                document.body.classList.remove('recording-mode');
-            }
-        }
-
-        // Ascolta il tasto ESC per uscire dalla modalità registrazione
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && recordingMode) {
-                toggleRecordingMode();
-            }
-        });
-
-        // Avvio ciclo
-        animationFrameId = requestAnimationFrame(animationLoop);
-    </script>
 </body>
 </html>
+
